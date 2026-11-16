@@ -4,9 +4,6 @@ import { Navbar } from '@/components/Navbar';
 import { LicenseActivation } from '@/components/LicenseActivation';
 import Link from 'next/link';
 
-// Отключаем статическую генерацию для этой страницы
-export const dynamic = 'force-dynamic';
-
 export default async function DashboardPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
