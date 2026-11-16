@@ -4,6 +4,9 @@ import { Navbar } from '@/components/Navbar';
 import { LicenseActivation } from '@/components/LicenseActivation';
 import Link from 'next/link';
 
+// Эта строчка теперь сработает, так как мы выключили cacheComponents
+export const dynamic = 'force-dynamic';
+
 export default async function DashboardPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
