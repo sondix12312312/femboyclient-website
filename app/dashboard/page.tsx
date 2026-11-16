@@ -4,8 +4,7 @@ import { Navbar } from '@/components/Navbar';
 import { LicenseActivation } from '@/components/LicenseActivation';
 import Link from 'next/link';
 
-// Официальный фикс для Next.js 16 (вместо force-dynamic)
-export const instant = false; 
+export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage() {
   const supabase = await createClient();
