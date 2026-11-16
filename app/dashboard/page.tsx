@@ -4,8 +4,8 @@ import { Navbar } from '@/components/Navbar';
 import { LicenseActivation } from '@/components/LicenseActivation';
 import Link from 'next/link';
 
-// Эта строчка теперь сработает, так как мы выключили cacheComponents
-export const dynamic = 'force-dynamic';
+// Официальный фикс для Next.js 16 (вместо force-dynamic)
+export const instant = false; 
 
 export default async function DashboardPage() {
   const supabase = await createClient();
