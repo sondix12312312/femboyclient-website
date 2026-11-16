@@ -2,7 +2,10 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { Navbar } from '@/components/Navbar';
 import { LicenseActivation } from '@/components/LicenseActivation';
-import Link from 'next/link'; // <-- Добавили импорт Link
+import Link from 'next/link';
+
+// Отключаем статическую генерацию для этой страницы
+export const dynamic = 'force-dynamic';
 
 export default async function DashboardPage() {
   const supabase = await createClient();
@@ -39,7 +42,6 @@ export default async function DashboardPage() {
 
           <div className="sidebar-label">MAIN</div>
           
-          {/* Исправили ошибку Next.js: теперь используем Link */}
           <Link href="/dashboard" className="sidebar-link active">Dashboard</Link>
           <Link href="/settings" className="sidebar-link">Settings</Link>
           
@@ -90,7 +92,6 @@ export default async function DashboardPage() {
               <h2>Ваша лицензия</h2>
             </div>
             
-            {/* Внедряем наш новый компонент активации */}
             <LicenseActivation uid={profile?.uid || 0} />
             
             <p className="dashboard-message">* Введите ключ, полученный после покупки подписки, чтобы активировать Premium.</p>
