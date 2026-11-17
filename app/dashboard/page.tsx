@@ -14,9 +14,10 @@ export default async function DashboardPage() {
     redirect('/login');
   }
 
+  // Запрашиваем профиль, добавляя данные о подписке (premium_until)
   const { data: profile } = await supabase
     .from('profiles')
-    .select('uid, username')
+    .select('uid, username, premium_until')
     .eq('id', user.id)
     .single();
 
@@ -91,7 +92,11 @@ export default async function DashboardPage() {
               <h2>Ваша лицензия</h2>
             </div>
             
-            <LicenseActivation uid={profile?.uid || 0} />
+            {/* Передаем данные о сроке действия подписки в компонент */}
+            <LicenseActivation 
+              uid={profile?.uid || 0} 
+              currentPremiumUntil={profile?.premium_until} 
+            />
             
             <p className="dashboard-message">* Введите ключ, полученный после покупки подписки, чтобы активировать Premium.</p>
           </section>

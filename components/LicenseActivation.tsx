@@ -1,59 +1,78 @@
 'use client';
 
 import { useState } from 'react';
+import { createClient } from '@/lib/supabase/client';
+import { useRouter } from 'next/navigation';
 
-export function LicenseActivation({ uid }: { uid: number | string }) {
+export function LicenseActivation({ uid, currentPremiumUntil }: { uid: number, currentPremiumUntil: string | null }) {
+  const router = useRouter();
+  const supabase = createClient();
   const [key, setKey] = useState('');
   const [loading, setLoading] = useState(false);
-  const [status, setStatus] = useState<'free' | 'premium'>('free');
   const [error, setError] = useState<string | null>(null);
 
-  const currentKey = status === 'premium' ? `PREMIUM-${uid}` : `FREE-TIER-${uid || '000'}`;
+  // Определяем статус
+  const isPremium = currentPremiumUntil === 'lifetime' || (currentPremiumUntil && new Date(currentPremiumUntil) > new Date());
+  
+  let statusText = 'Бесплатный (Free)';
+  let keyDisplay = `FREE-TIER-${uid}`;
+
+  if (currentPremiumUntil === 'lifetime') {
+    statusText = 'Lifetime Premium';
+    keyDisplay = `PREMIUM-LIFETIME-${uid}`;
+  } else if (isPremium) {
+    const dateStr = new Date(currentPremiumUntil!).toLocaleDateString('ru-RU');
+    statusText = `Premium (до ${dateStr})`;
+    keyDisplay = `PREMIUM-KEY-${uid}`;
+  }
 
   async function handleActivate(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setLoading(true);
 
-    // Имитация запроса к серверу (задержка 1 секунда)
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return;
 
-    // Для теста: если ключ содержит "PREMIUM" — активируем
-    if (key.trim().toUpperCase() === 'PREMIUM' || key.trim().toUpperCase() === 'PRO') {
-      setStatus('premium');
-      setKey('');
+    const res = await fetch('/api/license/activate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ licenseKey: key, userId: user.id })
+    });
+
+    const data = await res.json();
+
+    if (data.success) {
+      router.refresh(); // Обновляем страницу, чтобы подтянуть новые данные
     } else {
-      setError('Неверный или уже использованный ключ.');
+      setError(data.error);
+      setLoading(false);
     }
-    
-    setLoading(false);
   }
 
   return (
     <div>
       <div className="license-box">
         <div className="license-details">
-          <span>LICENSE KEY</span>
-          <strong style={{ color: status === 'premium' ? 'var(--success)' : 'var(--text)' }}>
-            {currentKey}
+          <span>СТАТУС ПОДПИСКИ</span>
+          <strong style={{ color: isPremium ? 'var(--success)' : 'var(--text)' }}>
+            {statusText}
           </strong>
         </div>
         <button 
           className="copy-field"
-          onClick={() => {
-            navigator.clipboard.writeText(currentKey);
-          }}
+          onClick={() => navigator.clipboard.writeText(keyDisplay)}
         >
-          Копировать
+          Копировать ID лицензии
         </button>
       </div>
 
-      {status === 'free' && (
+      {!isPremium && (
         <form className="license-activation-form" onSubmit={handleActivate}>
           <input
             type="text"
             className="license-input"
-            placeholder="Введите ключ активации..."
+            placeholder="Введите ключ (FBC-XXXX-XXXX-XXXX)..."
             value={key}
             onChange={(e) => setKey(e.target.value)}
             disabled={loading}
@@ -65,13 +84,11 @@ export function LicenseActivation({ uid }: { uid: number | string }) {
         </form>
       )}
 
-      {error && (
-        <p style={{ color: '#fecaca', fontSize: '12px', marginTop: '10px' }}>{error}</p>
-      )}
-
-      {status === 'premium' && (
+      {error && <p style={{ color: '#fecaca', fontSize: '12px', marginTop: '10px' }}>{error}</p>}
+      
+      {isPremium && (
         <p style={{ color: 'var(--success)', fontSize: '12px', marginTop: '10px' }}>
-          ✓ Премиум-подписка успешно активирована!
+          ✓ У вас активирована Premium-подписка. Спасибо за поддержку!
         </p>
       )}
     </div>
