@@ -47,7 +47,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'У вас нет активной лицензии' }, { status: 403 });
     }
 
-    // 4. Проверяем HWID
+    // 4. ПРОВЕРКА СРОКА ДЕЙСТВИЯ (Если подписка не Lifetime и дата в прошлом)
+    const isLifetime = license.duration_days === -1;
+    if (!isLifetime && profile.premium_until) {
+      if (new Date(profile.premium_until) < new Date()) {
+        return NextResponse.json({ error: 'Срок действия вашей подписки истек. Продлите её на сайте.' }, { status: 403 });
+      }
+    }
+
+    // 5. Проверяем HWID
     if (profile.hwid && profile.hwid !== hwid) {
       return NextResponse.json({ error: 'Аккаунт привязан к другому ПК' }, { status: 403 });
     }
@@ -59,14 +67,14 @@ export async function POST(req: NextRequest) {
         .eq('id', authData.user.id);
     }
 
-    // 5. Возвращаем данные, включая срок подписки
+    // 6. Возвращаем данные
     return NextResponse.json({
       success: true,
       user: {
         uid: profile.uid,
         username: profile.username,
-        premium_until: profile.premium_until, // Передаем дату
-        is_lifetime: license.duration_days === -1 // Передаем флаг "навсегда"
+        premium_until: profile.premium_until,
+        is_lifetime: isLifetime 
       }
     });
 
