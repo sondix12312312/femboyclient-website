@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Заполните все поля' }, { status: 400 });
     }
 
-    // 1. Проверяем логин и пароль через Supabase Auth
+    // 1. Проверяем логин и пароль
     const { data: authData, error: authError } = await supabaseAdmin.auth.signInWithPassword({
       email,
       password,
@@ -24,7 +24,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Неверный Email или пароль' }, { status: 401 });
     }
 
-    // 2. Получаем профиль пользователя
+    // 2. Получаем профиль
     const { data: profile } = await supabaseAdmin
       .from('profiles')
       .select('*')
@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Профиль не найден' }, { status: 404 });
     }
 
-    // 3. Проверяем, есть ли у него купленная лицензия
+    // 3. Проверяем лицензию
     const { data: license } = await supabaseAdmin
       .from('licenses')
       .select('*')
@@ -44,15 +44,14 @@ export async function POST(req: NextRequest) {
       .single();
 
     if (!license) {
-      return NextResponse.json({ error: 'У вас нет активной лицензии. Купите ключ на сайте и активируйте его.' }, { status: 403 });
+      return NextResponse.json({ error: 'У вас нет активной лицензии' }, { status: 403 });
     }
 
-    // 4. Проверяем HWID (привязка)
+    // 4. Проверяем HWID
     if (profile.hwid && profile.hwid !== hwid) {
-      return NextResponse.json({ error: 'Этот аккаунт уже привязан к другому компьютеру' }, { status: 403 });
+      return NextResponse.json({ error: 'Аккаунт привязан к другому ПК' }, { status: 403 });
     }
 
-    // Если HWID нет, привязываем текущий
     if (!profile.hwid) {
       await supabaseAdmin
         .from('profiles')
@@ -60,12 +59,14 @@ export async function POST(req: NextRequest) {
         .eq('id', authData.user.id);
     }
 
-    // 5. Всё отлично, пускаем в лаунчер
+    // 5. Возвращаем данные, включая срок подписки
     return NextResponse.json({
       success: true,
       user: {
         uid: profile.uid,
-        username: profile.username
+        username: profile.username,
+        premium_until: profile.premium_until, // Передаем дату
+        is_lifetime: license.duration_days === -1 // Передаем флаг "навсегда"
       }
     });
 
