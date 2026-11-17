@@ -14,15 +14,20 @@ export default async function DashboardPage() {
     redirect('/login');
   }
 
-  // Запрашиваем профиль, добавляя данные о подписке (premium_until)
+  // Добавили hwid в запрос к базе данных
   const { data: profile } = await supabase
     .from('profiles')
-    .select('uid, username, premium_until')
+    .select('uid, username, premium_until, hwid')
     .eq('id', user.id)
     .single();
 
   const dateObj = new Date(user.created_at);
   const createdAt = `${dateObj.getDate().toString().padStart(2, '0')}.${(dateObj.getMonth() + 1).toString().padStart(2, '0')}.${dateObj.getFullYear()}`;
+
+  // Обрезаем HWID, если он слишком длинный, для красоты
+  const displayHwid = profile?.hwid 
+    ? `${profile.hwid.substring(0, 10)}...` 
+    : 'Не привязан';
 
   return (
     <div className="dashboard-page">
@@ -84,6 +89,14 @@ export default async function DashboardPage() {
                 <span>Дата регистрации</span>
                 <strong>{createdAt}</strong>
               </div>
+              
+              {/* НОВЫЙ БЛОК С HWID */}
+              <div className="account-field" style={{ gridColumn: '1 / -1' }}>
+                <span>HWID (Привязка к ПК)</span>
+                <strong style={{ color: profile?.hwid ? 'var(--text)' : 'var(--muted)' }}>
+                  {displayHwid}
+                </strong>
+              </div>
             </div>
           </section>
 
@@ -92,7 +105,6 @@ export default async function DashboardPage() {
               <h2>Ваша лицензия</h2>
             </div>
             
-            {/* Передаем данные о сроке действия подписки в компонент */}
             <LicenseActivation 
               uid={profile?.uid || 0} 
               currentPremiumUntil={profile?.premium_until} 
