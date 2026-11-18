@@ -14,7 +14,6 @@ export default async function DashboardPage() {
     redirect('/login');
   }
 
-  // Добавили hwid в запрос к базе данных
   const { data: profile } = await supabase
     .from('profiles')
     .select('uid, username, premium_until, hwid')
@@ -24,10 +23,12 @@ export default async function DashboardPage() {
   const dateObj = new Date(user.created_at);
   const createdAt = `${dateObj.getDate().toString().padStart(2, '0')}.${(dateObj.getMonth() + 1).toString().padStart(2, '0')}.${dateObj.getFullYear()}`;
 
-  // Обрезаем HWID, если он слишком длинный, для красоты
   const displayHwid = profile?.hwid 
     ? `${profile.hwid.substring(0, 10)}...` 
     : 'Не привязан';
+
+  // Проверка подписки
+  const isPremium = profile?.premium_until === 'lifetime' || (profile?.premium_until && new Date(profile.premium_until) > new Date());
 
   return (
     <div className="dashboard-page">
@@ -64,6 +65,44 @@ export default async function DashboardPage() {
             <div className="online-status">Online</div>
           </div>
 
+          {/* БЛОК СКАЧИВАНИЯ ЛАУНЧЕРА */}
+          {isPremium && (
+            <section 
+              className="dashboard-section" 
+              style={{ 
+                background: 'linear-gradient(135deg, rgba(255,255,255,0.05) 0%, rgba(0,0,0,1) 100%)',
+                border: '1px solid rgba(255,255,255,0.2)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'space-between',
+                flexWrap: 'wrap',
+                gap: '20px'
+              }}
+            >
+              <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
+                <img 
+                  src="/launcher-icon.png" 
+                  alt="FemboyClient Launcher" 
+                  style={{ width: '80px', height: '80px', borderRadius: '16px', objectFit: 'cover', boxShadow: '0 0 20px rgba(255,255,255,0.2)' }} 
+                />
+                <div>
+                  <h2 style={{ fontSize: '22px', marginBottom: '8px' }}>FemboyClient Launcher</h2>
+                  <p style={{ color: 'var(--muted)', fontSize: '13px' }}>Скачайте официальный лаунчер для входа в игру.</p>
+                </div>
+              </div>
+              
+              {/* Ссылка ведет на портативный exe */}
+              <a 
+                href="/FemboyClient.exe" 
+                download
+                className="plan-button" 
+                style={{ width: 'auto', padding: '15px 30px', fontSize: '15px', textDecoration: 'none', display: 'inline-block' }}
+              >
+                Скачать (Windows)
+              </a>
+            </section>
+          )}
+
           <section className="dashboard-section">
             <div className="section-heading">
               <h2>Данные аккаунта</h2>
@@ -90,7 +129,6 @@ export default async function DashboardPage() {
                 <strong>{createdAt}</strong>
               </div>
               
-              {/* НОВЫЙ БЛОК С HWID */}
               <div className="account-field" style={{ gridColumn: '1 / -1' }}>
                 <span>HWID (Привязка к ПК)</span>
                 <strong style={{ color: profile?.hwid ? 'var(--text)' : 'var(--muted)' }}>
