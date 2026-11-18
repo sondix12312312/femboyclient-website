@@ -91,9 +91,9 @@ export default async function DashboardPage() {
                 </div>
               </div>
               
-              {/* СЮДА ВСТАВЬ СВОЮ ССЫЛКУ ИЗ GITHUB RELEASES */}
+              {/* ПРАВИЛЬНАЯ ССЫЛКА НА GITHUB RELEASE */}
               <a 
-                href="ТУТ_ССЫЛКА_НА_ТВОЙ_РЕЛИЗ_НА_GITHUB" 
+                href="https://github.com/sondix12312312/femboyclient-website/releases/download/v1.0.0/FemboyClient1.0.0.zip" 
                 download
                 className="plan-button" 
                 style={{ width: 'auto', padding: '15px 30px', fontSize: '15px', textDecoration: 'none', display: 'inline-block' }}
