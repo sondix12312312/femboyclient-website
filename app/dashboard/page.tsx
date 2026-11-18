@@ -91,9 +91,9 @@ export default async function DashboardPage() {
                 </div>
               </div>
               
-              {/* Ссылка ведет на портативный exe */}
+              {/* СЮДА ВСТАВЬ СВОЮ ССЫЛКУ ИЗ GITHUB RELEASES */}
               <a 
-                href="/FemboyClient.exe" 
+                href="ТУТ_ССЫЛКА_НА_ТВОЙ_РЕЛИЗ_НА_GITHUB" 
                 download
                 className="plan-button" 
                 style={{ width: 'auto', padding: '15px 30px', fontSize: '15px', textDecoration: 'none', display: 'inline-block' }}

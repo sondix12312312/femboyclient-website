@@ -28,3 +28,7 @@ yarn-error.log*
 
 # vercel
 .vercel
+
+# large files
+public/*.exe
+public/*.zip
