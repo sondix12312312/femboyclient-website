@@ -27,6 +27,7 @@ export default async function DashboardPage() {
     ? `${profile.hwid.substring(0, 10)}...` 
     : 'Не привязан';
 
+  // Проверка подписки
   const isPremium = profile?.premium_until === 'lifetime' || (profile?.premium_until && new Date(profile.premium_until) > new Date());
 
   return (
@@ -64,6 +65,7 @@ export default async function DashboardPage() {
             <div className="online-status">Online</div>
           </div>
 
+          {/* БЛОК СКАЧИВАНИЯ ЛАУНЧЕРА (Только для Premium) */}
           {isPremium && (
             <section 
               className="dashboard-section" 
@@ -89,9 +91,9 @@ export default async function DashboardPage() {
                 </div>
               </div>
               
-              {/* ССЫЛКА ВСТАВЛЕНА ЖЕСТКО */}
+              {/* ТУТ ТВОЯ ССЫЛКА НА EXE */}
               <a 
-                href="https://github.com/sondix12312312/femboyclient-website/releases/download/v1.0.0/FemboyClient.1.0.0.zip" 
+                href="https://github.com/sondix12312312/femboyclient-website/releases/download/v1.0.0/FemboyClient.exe" 
                 className="plan-button" 
                 style={{ width: 'auto', padding: '15px 30px', fontSize: '15px', textDecoration: 'none', display: 'inline-block' }}
               >
